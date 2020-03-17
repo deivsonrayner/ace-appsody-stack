@@ -1,0 +1,95 @@
+#Configuration file for deploying an appsody project
+
+#For more information, see: https://github.com/appsody/appsody-operator/blob/master/doc/user-guide.md
+
+apiVersion: appsody.dev/v1beta1
+kind: AppsodyApplication
+metadata: 
+  name: APPSODY_PROJECT_NAME
+  labels:
+    app: APPSODY_PROJECT_NAME
+spec:
+  version: 1.0.0
+  applicationImage: APPSODY_DOCKER_IMAGE
+  replicas: 1
+  resources:
+    limits:
+      cpu: '2'
+      memory: 4Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  env:
+    - name: LICENSE
+      value: accept
+    - name: ACE_SERVER_NAME
+      value: {{.stack.serverName}}
+    - name: ACE_TRUSTSTORE_PASSWORD
+      value: truststorepwd
+    - name: ACE_KEYSTORE_PASSWORD
+      value: keystorepwd
+    - name: LOG_FORMAT
+      value: basic
+    - name: ACE_ENABLE_METRICS
+      value: 'true'
+    - name: USE_QMGR
+      value: 'false'
+  stack: APPSODY_STACK
+  securityContext:
+    runAsUser: 1000
+  service:
+    type: NodePort
+    port: 7600
+  service:
+    type: NodePort
+    port: 7800  
+  expose: true
+  readinessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /
+      port: 7600
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /
+      port: 7600
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: APPSODY_PROJECT_NAME
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '9483'
+spec:
+  selector:
+    app: APPSODY_PROJECT_NAME
+  ports:
+    - protocol: TCP
+      name: http-1
+      port: 7600
+      targetPort: 7600
+    - protocol: TCP
+      name: http-2
+      port: 7800
+      targetPort: 7800
+    - protocol: TCP
+      name: http-3
+      port: 7843
+      targetPort: 7843
+    - protocol: TCP
+      name: metric
+      targetPort: 9483
+      port: 9483
+  type: NodePort

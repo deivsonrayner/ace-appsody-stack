@@ -1,0 +1,5 @@
+# resource user password
+setdbparms::truststore "my username" truststorepwd
+mqsisetdbparms -w /home/aceuser/ace-server -n salesforce::SecurityIdentity -u "my username" -p myPassword -c myClientID -s myClientSecret
+mqsisetdbparms -w /home/aceuser/ace-server -n kafka::KAFKA -u token -p "KEY"
+mqsisetdbparms -w /home/aceuser/ace-server -n mq::MQ  -u mqm -p mqm

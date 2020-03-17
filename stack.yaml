@@ -1,0 +1,13 @@
+name: IBM AppConnect Enterprise - Stack
+version: 0.1.0
+description: IBM AppConnect Enterprise Stack
+license: Apache-2.0
+language: bash
+maintainers: 
+  - name: Deivson Rayner Teixeira da Costa
+    email: drayner@br.ibm.com
+    github-id: deivsonrayner
+default-template: simple
+templating-data:
+  serverName: ACE_SERVER
+  aceVersion: 11.0.0.6.1

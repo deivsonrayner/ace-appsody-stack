@@ -1,0 +1,69 @@
+FROM ibmcom/ace:{{.stack.aceVersion}}-amd64
+
+USER aceuser
+
+ENV APPSODY_PROJECT_DIR=/home/aceuser
+
+# See https://appsody.dev/docs/stacks/environment-variables for more information about each variable.
+
+# Mount the application directory into the container filesystem, for example
+ENV APPSODY_MOUNTS=/workspace/BARfiles:/home/aceuser/bars;/initial-config:/home/aceuser/initial-config
+
+# Directories to watch for changes in
+ENV APPSODY_WATCH_DIR=/home/aceuser/bars
+
+# Directories to ignore changes in
+ENV APPSODY_WATCH_IGNORE_DIR= 
+
+# Types of file that will trigger a re-launch (change this to be specific to your application).
+ENV APPSODY_WATCH_REGEX="^.*.bar$"
+
+# Optional command executed before RUN/TEST/DEBUG - typically used to install any dependencies from
+# the user application
+ENV APPSODY_PREP=
+
+# Configurations for appsody run
+# APPSODY_RUN should specify the command to launch your application
+# APPSODY_RUN_ON_CHANGE should specify the command to re-launch your application if triggered by a file change
+# APPSODY_RUN_KILL Signals whether to kill the server process before starting the APPSODY_RUN_ON_CHANGE action
+
+ENV APPSODY_RUN="ace_compile_bars.sh && runaceserver"
+ENV APPSODY_RUN_ON_CHANGE="/home/aceuser/deploy-bars.sh"
+ENV APPSODY_RUN_KILL=false
+
+# Configurations for appsody debug
+# APPSODY_DEBUG should specify the command to launch your application in debug mode
+# APPSODY_DEBUG_ON_CHANGE should specify the command to re-launch your application in debug mode if triggered by a file change
+# APPSODY_DEBUG_KILL Signals whether to kill the server process before starting the APPSODY_DEBUG_ON_CHANGE action
+
+#ENV APPSODY_DEBUG="echo -n \"Debugging \"; /bin/bash /project/userapp/hello.sh"
+#ENV APPSODY_DEBUG_ON_CHANGE=$APPSODY_DEBUG
+#ENV APPSODY_DEBUG_KILL=false
+
+# Configurations for appsody test
+# APPSODY_TEST should specify the command to launch your application in test mode
+# APPSODY_TEST_ON_CHANGE should specify the command to re-launch your application in test mode if triggered by a file change
+# APPSODY_TEST_KILL Signals whether to kill the server process before starting the APPSODY_TEST_ON_CHANGE action
+
+#ENV APPSODY_TEST="/bin/bash /project/userapp/tests/test.sh"
+#ENV APPSODY_TEST_ON_CHANGE=$APPSODY_TEST
+#ENV APPSODY_TEST_KILL=false
+
+# Copy the common components across into your stack filesystem (most stacks will need these)
+COPY ./LICENSE /home/aceuser/
+COPY ./project/Dockerfile /home/aceuser/
+ADD ./config/app-deploy.yaml /config/
+COPY ./project/deploy-bars.sh /home/aceuser/
+
+ENV LICENSE=accept
+ENV ACE_SERVER_NAME=ACE_SERVER
+ENV ACE_TRUSTSTORE_PASSWORD=truststorepwd
+ENV ACE_KEYSTORE_PASSWORD=keystorepwd
+ENV LOG_FORMAT=basic
+ENV ACE_ENABLE_METRICS=true
+ENV USE_QMGR=false
+
+EXPOSE 8080 7600 7800 7843 9999
+
+# Set the working directory to the project directory, which typically contains the stack components and userapp
+WORKDIR /home/aceuser/
