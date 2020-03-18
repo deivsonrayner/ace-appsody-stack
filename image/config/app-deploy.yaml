@@ -33,17 +33,16 @@ spec:
     - name: ACE_ENABLE_METRICS
       value: 'true'
     - name: USE_QMGR
-      value: 'false'
+      value: {{.stack.useMQ}}
   stack: APPSODY_STACK
   securityContext:
     runAsUser: 1000
   service:
     type: NodePort
-    port: 7600
-  service:
-    type: NodePort
-    port: 7800  
-  expose: true
+    port: 7800
+    annotations:
+      prometheus.io/scrape: 'true'
+      prometheus.io/port: '9483'
   readinessProbe:
     failureThreshold: 3
     httpGet:
@@ -64,32 +63,3 @@ spec:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 1
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: APPSODY_PROJECT_NAME
-  annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '9483'
-spec:
-  selector:
-    app: APPSODY_PROJECT_NAME
-  ports:
-    - protocol: TCP
-      name: http-1
-      port: 7600
-      targetPort: 7600
-    - protocol: TCP
-      name: http-2
-      port: 7800
-      targetPort: 7800
-    - protocol: TCP
-      name: http-3
-      port: 7843
-      targetPort: 7843
-    - protocol: TCP
-      name: metric
-      targetPort: 9483
-      port: 9483
-  type: NodePort
